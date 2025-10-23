@@ -44,11 +44,10 @@ class CloudflareAPIRequester {
 	 */
 	public function cachePurge( $urls ): void {
 		$apiKey = $this->config->get( 'CloudflareAPIKey' );
-		$email = $this->config->get( 'CloudflareEmail' );
 		$zoneID = $this->config->get( 'CloudflareZoneID' );
 
 		// Check if the necessary configuration values are set
-		if ( $apiKey == "" || $email == "" || $zoneID == "" ) {
+		if ( $apiKey == "" || $zoneID == "" ) {
 			throw new MWException( 'Cloudflare configuration values are missing' );
 		}
 
@@ -57,23 +56,35 @@ class CloudflareAPIRequester {
 		 * https://developers.cloudflare.com/api/operations/zone-purge#purge-cached-content-by-url
 		 */
 		$endpoint = "https://api.cloudflare.com/client/v4/zones/{$zoneID}/purge_cache";
-		$headers = [
-			'X-Auth-Email' => $email,
-			'X-Auth-Key' => $apiKey,
-			'Content-Type' => 'application/json',
-		];
 		$body = [
 			'files' => $urls,
 		];
+		$jsonBody = json_encode( $body );
 
-		$guzzleClient = $this->httpRequestFactory->createGuzzleClient();
+		$guzzleClient = $this->httpRequestFactory->create(
+			$endpoint,
+			[
+				'method' => 'POST',
+				'postData' => $jsonBody,
+				'timeout' => 60
+			]
+		);
+		$guzzleClient->setHeader( 'Authorization', 'Bearer ' . $apiKey );
+		$guzzleClient->setHeader( 'Content-Type', 'application/json' );
 
 		try {
-			$response = $guzzleClient->post( $endpoint, [
-				'headers' => $headers,
-				'json' => $body,
-			] );
-			$this->logger->info( 'Purge cache succeeded with status: ' . $response->getStatusCode() . ' and Urls: ' . implode( ', ', $urls ) );
+			$status = $guzzleClient->execute();
+			if ( $status->isGood() ) {
+				$response = $guzzleClient->getContent();
+				$this->logger->info(
+					'Purge cache succeeded with status: ' . $guzzleClient->getStatus() . ' and Urls: ' . implode(
+						', ',
+						$urls
+					)
+				);
+			} else {
+				$this->logger->error( 'Failed to purge cache: ' . implode(",", $status->getErrors() ) );
+			}
 		} catch ( RequestException $e ) {
 			$this->logger->error( 'Failed to purge cache: ' . $e->getMessage() );
 		}
