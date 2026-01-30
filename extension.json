@@ -20,7 +20,7 @@
 		"LocalFilePurgeThumbnails": "MediaWiki\\Extension\\Cloudflare\\HookHandler::onLocalFilePurgeThumbnails",
 		"PageSaveComplete":"MediaWiki\\Extension\\Cloudflare\\HookHandler::onPageSaveComplete",
 		"PageMoveComplete":"MediaWiki\\Extension\\Cloudflare\\HookHandler::onPageMoveComplete",
-		"PageDeleteComplete":"MediaWiki\\Extension\\Cloudflare\\HookHandler::onPageDeleteComplete"
+		"ArticleDeleteComplete":"MediaWiki\\Extension\\Cloudflare\\HookHandler::onArticleDeleteComplete"
 	},
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\Cloudflare\\": "includes/"

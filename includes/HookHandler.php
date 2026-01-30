@@ -34,12 +34,12 @@ class HookHandler {
 	}
 
 
-	public static function onPageDeleteComplete( ProperPageIdentity $page, Authority $deleter, string $reason, int $pageID, RevisionRecord $deletedRev, ManualLogEntry $logEntry, int $archivedRevisionCount ): void
+	public static function onArticleDeleteComplete( &$article, &$user, $reason, $id, $content, $logEntry, $archivedRevisionCount ): void
     {
 		$config = MediaWikiServices::getInstance()->getMainConfig();
 		$cloudflare = MediaWikiServices::getInstance()->get( 'CloudflareAPIRequester' );
 		if ( $config->get( 'CloudflarePurgePage' ) ) {
-			$pageTitle = $oldTitle = MediaWikiServices::getInstance()->getTitleFactory()->newFromDBkey( $page->getDBkey() );
+			$pageTitle = $article->getTitle();
 			if ( $pageTitle ) {
 				$url = $pageTitle->getFullURL();
 				$cloudflare->cachePurge( [ $url ] );
