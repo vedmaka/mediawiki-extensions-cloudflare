@@ -6,6 +6,7 @@ use Config;
 use ManualLogEntry;
 use MediaWiki\Hook\LocalFilePurgeThumbnailsHook;
 use MediaWiki\Hook\PageMoveCompleteHook;
+use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\Hook\PageDeleteCompleteHook;
 use MediaWiki\Page\ProperPageIdentity;
@@ -38,19 +39,31 @@ class HookHandler {
 		$config = MediaWikiServices::getInstance()->getMainConfig();
 		$cloudflare = MediaWikiServices::getInstance()->get( 'CloudflareAPIRequester' );
 		if ( $config->get( 'CloudflarePurgePage' ) ) {
-			$url = $page->getTitle()->getFullURL();
-			$cloudflare->cachePurge( [ $url ] );
+			$pageTitle = $oldTitle = MediaWikiServices::getInstance()->getTitleFactory()->newFromDBkey( $page->getDBkey() );
+			if ( $pageTitle ) {
+				$url = $pageTitle->getFullURL();
+				$cloudflare->cachePurge( [ $url ] );
+			}
 		}
 	}
 
-	public static function onPageMoveComplete( $old, $new, $user, $pageid, $redirid, $reason, $revision ): void
+	public static function onPageMoveComplete( LinkTarget $old, LinkTarget $new, $user, $pageid, $redirid, $reason, $revision ): void
     {
 		$config = MediaWikiServices::getInstance()->getMainConfig();
 		$cloudflare = MediaWikiServices::getInstance()->get( 'CloudflareAPIRequester' );
 		if ( $config->get( 'CloudflarePurgePage' ) ) {
-			$oldUrl = $old->getTitle()->getFullURL();
-			$newUrl = $new->getTitle()->getFullURL();
-			$cloudflare->cachePurge( [ $oldUrl, $newUrl ] );
+			$oldTitle = MediaWikiServices::getInstance()->getTitleFactory()->newFromLinkTarget( $old );
+			$newTitle = MediaWikiServices::getInstance()->getTitleFactory()->newFromLinkTarget( $new );
+			if ( $oldTitle && $newTitle ) {
+				$oldUrl = $oldTitle->getFullURL();
+				$newUrl = $newTitle->getFullURL();
+				$cloudflare->cachePurge(
+					[
+						$oldUrl,
+						$newUrl
+					]
+				);
+			}
 		}
 	}
 
