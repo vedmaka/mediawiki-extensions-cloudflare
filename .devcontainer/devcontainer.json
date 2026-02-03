@@ -1,0 +1,16 @@
+{
+  "name": "Cloudflare MediaWiki Extension",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "bmewburn.vscode-intelephense-client",
+        "editorconfig.editorconfig"
+      ]
+    }
+  },
+  "postCreateCommand": "composer install --no-interaction || true",
+  "remoteUser": "vscode"
+}
