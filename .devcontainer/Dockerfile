@@ -1,11 +1,9 @@
-FROM mcr.microsoft.com/devcontainers/php:0-7.4
+FROM mcr.microsoft.com/devcontainers/php:0-8.1  # or newer stable version
 
-# Import Yarn GPG key to avoid "NO_PUBKEY" failures from yarnpkg.com
-# (some base images add the Yarn APT source; ensure its key is present)
+# Import Yarn GPG key using modern approach
 RUN set -eux; \
-    if command -v curl >/dev/null 2>&1; then \
-        curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - || true; \
-    fi
+    mkdir -p /etc/apt/keyrings; \
+    curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor > /etc/apt/keyrings/yarn-archive-keyring.gpg || true
 
 # Ensure common utilities and compatibility libraries are present
 RUN apt-get update \
