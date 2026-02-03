@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/php:0-8.1  # or newer stable version
+FROM mcr.microsoft.com/devcontainers/php:0-8.1
 
 # Import Yarn GPG key using modern approach
 RUN set -eux; \
