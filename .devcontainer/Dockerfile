@@ -6,7 +6,7 @@ RUN set -eux; \
     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor > /etc/apt/keyrings/yarn-archive-keyring.gpg || true
 
 # Ensure common utilities and compatibility libraries are present
-RUN apt-get update \
+RUN apt-get update --fix-missing \
     && apt-get install -y --no-install-recommends \
         git \
         unzip \
